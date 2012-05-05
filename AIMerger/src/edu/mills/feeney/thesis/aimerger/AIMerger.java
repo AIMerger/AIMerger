@@ -577,14 +577,14 @@ public class AIMerger extends JFrame {
     // Layout for Icon
     BufferedImage myPicture = null;
     try {
-      myPicture = ImageIO.read(new File("logo.png"));
+      myPicture = ImageIO.read(new File("logoclear.png"));
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
     JLabel picLabel = new JLabel(new ImageIcon( myPicture ));
-    picLabel.setSize(275, 80);
-    picLabel.setLocation(700, 20);
+    picLabel.setSize(400, 145);
+    picLabel.setLocation(575, 20);
     myCP.add(picLabel);
     
     // Lower Panel
