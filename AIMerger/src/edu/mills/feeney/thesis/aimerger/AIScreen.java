@@ -1,63 +1,40 @@
 package edu.mills.feeney.thesis.aimerger;
 
 /**
- * Class to define an App Inventor Screen by its path, name and if it is to be merged.
+ * A representation of an App Inventor screen.
  * 
- * @author Kate Feeney, feeney.kate@gmail.com 
+ * @author feeney.kate@gmail.com (Kate Feeney)
  */
 public class AIScreen {
 
   // Backing for the screen's directory path from project file
   private String screenPath;
 
-  // Backing for the screen's name
-  private String screenName;
-
   /**
    * Creates a new AIScreen.
-   *
-   * @param String  screenPath, string of the screen's directory path from project file
+   * 
+   * @param screenPath the path to the screen within the project file
    */
   public AIScreen(String screenPath) {
-    this.screenPath = screenPath;  
-    // The screenName is the name of the screen's file.
-    this.screenName = screenPath.substring(screenPath.lastIndexOf('/') + 1,
-        screenPath.lastIndexOf('.'));
+    this.screenPath = screenPath;
   }
 
   /**
-   * Returns an AIScreen's directory path from the project file.
+   * Returns an AIScreen's directory path within the project file.
    * 
-   * @return string of AIScreen's directory path from the project file
+   * @return AIScreen's directory path within the project file
    */
   public String getPath() {
     return screenPath;
   }
 
   /**
-   * Sets the AIScreen's path.
-   *
-   * @param String  screenPath, string of the screen's directory path from project file
-   */
-  public void setPath(String screenPath) {
-    this.screenPath = screenPath;
-  }
-
-  /**
    * Returns the AIScreen's name.
    * 
-   * @return string of AIScreen's name
+   * @return AIScreen's name
    */
   public String getName() {
-    return screenName;
-  }
-
-  /**
-   * Sets the AIScreen's name.
-   *
-   * @param String  screenName
-   */
-  public void setName(String screenName) {
-    this.screenName = screenName;
+    // The screenName is the name of the screen's file.
+    return screenPath.substring(screenPath.lastIndexOf('/') + 1, screenPath.lastIndexOf('.'));
   }
 }
