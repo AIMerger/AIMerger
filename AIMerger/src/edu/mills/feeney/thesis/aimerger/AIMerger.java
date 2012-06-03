@@ -37,17 +37,63 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 /**
- * Generates a user interface that allows users to select two projects to merge
- * together. Completes the merging.
+ * A user interface enabling users to merge two App Inventor projects.
  * 
  * @author feeney.kate@gmail.com (Kate Feeney)
  */
 public class AIMerger extends JFrame {
+
+  private static AIMerger instance;
+  public static Container myCP;
+  private static JPanel mainProjectDisplayP;
+  private static JPanel mergeButtonP;
+  private static JPanel secondProjectDisplayP;
+
+  private JLabel instructMainProjectL;
+  private JLabel instructMainProjectNotesL;
+  private JLabel instructSecondProjectL;
+  private static JLabel mainProjectTitleL;
+  private static JLabel secondProjectTitleL;
+  private JLabel mainProjectAssetsL;
+  private JLabel mainProjectScreensInstrucL;
+  private JLabel mainProjectScreensL;
+  private JLabel mainProjectAssetsInstrucL;
+  private JLabel secondProjectAssetsL;
+  private JLabel secondProjectScreensInstrucL;
+  private JLabel secondProjectScreensL;
+  private JLabel secondProjectAssetsInstrucL;
+  private JLabel picLabel;
+  private JButton mainProjectBrowseB;
+  private JButton mainProjectLoadB;
+  private JButton secondProjectBrowseB;
+  private JButton secondProjectLoadB;
+  private JButton mergeB;
+  private JTextField mainProjectTF;
+  private JTextField secondProjectTF;
+  private Font HEADER_TWO_FONT = new Font("Dialog", Font.PLAIN, 18);
+  private Font HEADER_THREE_FONT = new Font("Dialog", Font.ITALIC, 12);
+  private Double HEIGHT_PERCENT_OF_SCREEN = 0.8;
+  private Double WIDTH_PERCENT_OF_SCREEN = 0.8;
+  private int OFFSET = 50;
+  private Dimension projectDisplayPanelSize;
+  private Point projectDisplayPanelLocation;
+  private static JScrollPane mainProjectScreensP;
+  private static JScrollPane mainProjectAssetsP;
+  private static JScrollPane secondProjectScreensP;
+  private static JScrollPane secondProjectAssetsP;
+  private static CheckBoxList mainProjectScreensCBL;
+  private static CheckBoxList mainProjectAssetsCBL;
+  private static AIProject mainProject;
+  private static CheckBoxList secondProjectScreensCBL;
+  private static CheckBoxList secondProjectAssetsCBL;
+  private static AIProject secondProject;
+  private static String mergeProjectPath;
+  private final Color ANDROID_GREEN = new Color(166, 199, 58);
+
   // Action listener for the main project's browse button.
   private class MainProjectBrowseBActionListener implements ActionListener {
-    // When the main project Browse button is pressed a file browsing window
-    // opens and the
-    // file selected by the user appears in the main project text box.
+    // When the main project's Browse button is pressed, a file browsing window
+    // opens and the file selected by the user appears in the main project text box.
     @Override
     public void actionPerformed(ActionEvent event) {
       String path = getFileToOpen();
@@ -59,9 +105,8 @@ public class AIMerger extends JFrame {
 
   // Action listener for the second project's browse button.
   private class SecondProjectBrowseBActionListener implements ActionListener {
-    // When the second project Browse button is pressed a file browsing window
-    // opens and the
-    // file selected by the user appears in the second project text box.
+    // When the second project's Browse button is pressed, a file browsing window
+    // opens and the file selected by the user appears in the second project text box.
     @Override
     public void actionPerformed(ActionEvent event) {
       String path = getFileToOpen();
@@ -80,11 +125,12 @@ public class AIMerger extends JFrame {
       mainProject = new AIProject(mainProjectTF.getText());
       // Display main project.
       if (mainProject.isValid()) {
-        lowerLeftP.setVisible(true);
+        mainProjectDisplayP.setVisible(true);
         updateMainProjectView();
-        lowerCenterP.setVisible(lowerRightP.isVisible());
+        // Set the lower center panel to visible if the lower right panel is already visible. 
+        mergeButtonP.setVisible(secondProjectDisplayP.isVisible());
       } else {
-        lowerLeftP.setVisible(false);
+        mainProjectDisplayP.setVisible(false);
       }
     }
   }
@@ -96,11 +142,12 @@ public class AIMerger extends JFrame {
     public void actionPerformed(ActionEvent event) {
       secondProject = new AIProject(secondProjectTF.getText());
       if (secondProject.isValid()) {
-        lowerRightP.setVisible(true);
+        secondProjectDisplayP.setVisible(true);
         updateSecondProjectView();
-        lowerCenterP.setVisible(lowerLeftP.isVisible());
+        // Set the lower center panel to visible if the lower left panel is already visible. 
+        mergeButtonP.setVisible(mainProjectDisplayP.isVisible());
       } else {
-        lowerRightP.setVisible(false);
+        secondProjectDisplayP.setVisible(false);
       }
     }
   }
@@ -110,29 +157,23 @@ public class AIMerger extends JFrame {
     // Action performed when button is clicked.
     @Override
     public void actionPerformed(ActionEvent event) {
-      if (checkDuplicates()) {
+      if (alertToDuplicates()) {
         // List to hold files to be included in the new project from the main
         // project.
         List<String> filesFromMainProject = new ArrayList<String>();
-        // The properties file from the main project is always included in the
-        // new project.
+        // The properties file from the main project is always included in the new project.
         filesFromMainProject.add(mainProject.getPropertiesFilePath());
 
-        // List to hold files to be included in the new project from the second
-        // project.
+        // List to hold files to be included in the new project from the second project.
         List<String> filesFromSecondProject = new ArrayList<String>();
 
-        // Temporary list to hold the name of files that have been checked to be
-        // included in
-        // the new project.
-        LinkedList<String> checked = new LinkedList<String>();
-        // checked is first the list of screens checked from the main project.
-        checked = mainProjectScreensCBL.getChecked();
-        // Add checked screens to the list of files to include from the main
-        // project.
-        if (!checked.isEmpty()) {
+        // Temporary list to hold the name of the screens from the main project that have been 
+        // checked to be included in the new project. 
+        List<String> mainProjectCheckedScreens = mainProjectScreensCBL.getChecked();
+        // Add checked screens to the list of files to include from the main project.
+        if (!mainProjectCheckedScreens.isEmpty()) {
           for (AIScreen aiScreen : mainProject.getScreensList()) {
-            if (checked.contains(aiScreen.getName())) {
+            if (mainProjectCheckedScreens.contains(aiScreen.getName())) {
               String path = aiScreen.getPath();
               filesFromMainProject.add(path);
               filesFromMainProject.add(path.substring(0, path.lastIndexOf(".scm")).concat(".blk"));
@@ -140,55 +181,53 @@ public class AIMerger extends JFrame {
           }
         }
 
-        // checked is now the list of assets checked from the main project.
-        checked = mainProjectAssetsCBL.getChecked();
-        // Add checked assets to the list of files to include from the main
-        // project.
-        if (!checked.isEmpty()) {
+        // Temporary list to hold the name of the assets from the main project that have been 
+        // checked to be included in the new project. 
+        List<String> mainProjectCheckedAssets = mainProjectAssetsCBL.getChecked();
+        // Add checked assets to the list of files to include from the main project.
+        if (!mainProjectCheckedAssets.isEmpty()) {
           for (AIAsset aiAsset : mainProject.getAssetsList()) {
-            if (checked.contains(aiAsset.getName())) {
+            if (mainProjectCheckedAssets.contains(aiAsset.getName())) {
               filesFromMainProject.add(aiAsset.getPath());
             }
           }
         }
 
-        // checked is now the list of screens checked from the second project.
-        checked = secondProjectScreensCBL.getChecked();
-        // Add checked screens to the list of files to include from the second
-        // project.
-        if (!checked.isEmpty()) {
+        // Temporary list to hold the name of the screens from the second project that have been 
+        // checked to be included in the new project. 
+        List<String> secondProjectCheckedScreens = secondProjectScreensCBL.getChecked();
+        // Add checked screens to the list of files to include from the second project.
+        if (!secondProjectCheckedScreens.isEmpty()) {
           for (AIScreen aiScreen : secondProject.getScreensList()) {
-            if (checked.contains(aiScreen.getName())) {
+            if (secondProjectCheckedScreens.contains(aiScreen.getName())) {
               String path = aiScreen.getPath();
               filesFromSecondProject.add(path);
               filesFromSecondProject
-                  .add(path.substring(0, path.lastIndexOf(".scm")).concat(".blk"));
+              .add(path.substring(0, path.lastIndexOf(".scm")).concat(".blk"));
             }
           }
         }
 
-        // checked is now the list of assets checked from the second project.
-        checked = secondProjectAssetsCBL.getChecked();
-        // Add checked assets to the list of files to include from the second
-        // project.
-        if (!checked.isEmpty()) {
+        // Temporary list to hold the name of the assets from the second project that have been 
+        // checked to be included in the new project. 
+        List<String> secondProjectCheckedAssets = secondProjectAssetsCBL.getChecked();
+        // Add checked assets to the list of files to include from the second project.
+        if (!secondProjectCheckedAssets.isEmpty()) {
           for (AIAsset aiAsset : secondProject.getAssetsList()) {
-            if (checked.contains(aiAsset.getName())) {
+            if (secondProjectCheckedAssets.contains(aiAsset.getName())) {
               filesFromSecondProject.add(aiAsset.getPath());
             }
           }
         }
 
         try {
-          getFileToSaveTo();
+          mergeProjectPath = getFileToSaveTo();
           ZipOutputStream outZip = new ZipOutputStream(new FileOutputStream(mergeProjectPath));
-          ZipInputStream mainZipInput = new ZipInputStream(new BufferedInputStream(
-              new FileInputStream(mainProject.getProjectPath())));
-          ZipInputStream secondZipInput = new ZipInputStream(new BufferedInputStream(
-              new FileInputStream(secondProject.getProjectPath())));
 
           byte[] buf = new byte[1024];
 
+          ZipInputStream mainZipInput = new ZipInputStream(new BufferedInputStream(
+              new FileInputStream(mainProject.getProjectPath())));
           // Write files from main project to new project.
           ZipEntry curEntry;
           while ((curEntry = mainZipInput.getNextEntry()) != null) {
@@ -203,24 +242,27 @@ public class AIMerger extends JFrame {
             }
           }
           mainZipInput.close();
-
-          // Write files from second project to new project.
-          while ((curEntry = secondZipInput.getNextEntry()) != null) {
-            if (filesFromSecondProject.contains(curEntry.getName())) {
-              outZip.putNextEntry(curEntry);
-              int len;
-              while ((len = secondZipInput.read(buf)) > 0) {
-                outZip.write(buf, 0, len);
+          if (!filesFromSecondProject.isEmpty()) {
+            ZipInputStream secondZipInput = new ZipInputStream(new BufferedInputStream(
+                new FileInputStream(secondProject.getProjectPath())));
+            // Write files from second project to new project.
+            while ((curEntry = secondZipInput.getNextEntry()) != null) {
+              if (filesFromSecondProject.contains(curEntry.getName())) {
+                outZip.putNextEntry(curEntry);
+                int len;
+                while ((len = secondZipInput.read(buf)) > 0) {
+                  outZip.write(buf, 0, len);
+                }
+                outZip.closeEntry();
+                secondZipInput.closeEntry();
               }
-              outZip.closeEntry();
-              secondZipInput.closeEntry();
             }
+            secondZipInput.close();
           }
-          secondZipInput.close();
           outZip.close();
-          successfulMerge();
+          offerNewMerge();
         } catch (IOException e1) {
-          JOptionPane.showMessageDialog(myCP, "Invalid file name.", "Inane error",
+          JOptionPane.showMessageDialog(myCP, "Invalid file name.", "File name error",
               JOptionPane.ERROR_MESSAGE);
           actionPerformed(event);
         }
@@ -229,19 +271,19 @@ public class AIMerger extends JFrame {
   }
 
   /*
-   * Resets UI to what appears when the project is loaded. If a project's path
+   * Resets UI to what appears when the application starts. If a project's path
    * is passed then this is loaded as the main project.
    */
   private void resetAIMerger(String aiProjectPath) {
     mainProjectTF.setText(null);
     secondProjectTF.setText(null);
-    lowerLeftP.setVisible(false);
-    lowerRightP.setVisible(false);
-    lowerCenterP.setVisible(false);
+    mainProjectDisplayP.setVisible(false);
+    secondProjectDisplayP.setVisible(false);
+    mergeButtonP.setVisible(false);
     if (aiProjectPath != null) {
       mainProjectTF.setText(aiProjectPath);
       mainProject = new AIProject(aiProjectPath);
-      lowerLeftP.setVisible(true);
+      mainProjectDisplayP.setVisible(true);
       updateMainProjectView();
     }
   }
@@ -250,9 +292,9 @@ public class AIMerger extends JFrame {
    * Informs the user their merge was successful and asks if they would like to
    * merge another project.
    */
-  private void successfulMerge() {
+  private void offerNewMerge() {
     int response = JOptionPane.showOptionDialog(myCP, "Projects Successfully Merged. "
-        + "Would you like to Merge more Projects?", "Projects Merged", JOptionPane.YES_NO_OPTION,
+        + "Would you like to merge more projects?", "Projects Merged", JOptionPane.YES_NO_OPTION,
         JOptionPane.INFORMATION_MESSAGE, null, null, JOptionPane.YES_OPTION);
     switch (response) {
       default:
@@ -263,16 +305,15 @@ public class AIMerger extends JFrame {
         closeApplication();
         break;
       case JOptionPane.YES_OPTION:
-        mergeAnotherProject();
+        offerToMergeToNewProject();
         break;
     }
   }
 
   /*
-   * Asks user if they want to merge another project to the recently merged
-   * project.
+   * Asks user if they want to merge another project to the recently merged project.
    */
-  private void mergeAnotherProject() {
+  private void offerToMergeToNewProject() {
     int response = JOptionPane.showOptionDialog(myCP, "Would you like one of the projects to merge"
         + "to be the project you just created?", "Merge More Projects", JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE, null, null, JOptionPane.YES_OPTION);
@@ -305,7 +346,7 @@ public class AIMerger extends JFrame {
         throw new IllegalArgumentException("not an option");
       case JOptionPane.CLOSED_OPTION:
       case JOptionPane.CANCEL_OPTION:
-        successfulMerge();
+        offerNewMerge();
         break;
       case JOptionPane.OK_OPTION:
         System.exit(0);
@@ -313,71 +354,68 @@ public class AIMerger extends JFrame {
     }
   }
 
-  private void getFileToSaveTo() {
+  private String getFileToSaveTo() {
     // Get new project's file path.
     JFileChooser mergeProjectFS = new JFileChooser();
     mergeProjectFS.setDialogType(JFileChooser.SAVE_DIALOG);
+    String projectPath = null;
     int validPath = mergeProjectFS.showSaveDialog(myCP);
-    if (validPath == JFileChooser.ERROR_OPTION || validPath == JFileChooser.CANCEL_OPTION) {
-      return;
-    } else {
-      // The file must be a zip file.
-      File mergeProjectFile = mergeProjectFS.getSelectedFile();
-      mergeProjectPath = mergeProjectFile.getPath();
-      if (!mergeProjectPath.endsWith(".zip")) {// want to make this ignore case
-        if (mergeProjectPath.matches("(?i).*\\.zip")) {
-          mergeProjectPath = mergeProjectPath.substring(0, mergeProjectPath.lastIndexOf("."));
-        }
-        mergeProjectPath = mergeProjectPath.concat(".zip");
-        mergeProjectFile = new File(mergeProjectPath);
+    if (validPath != JFileChooser.ERROR_OPTION || validPath != JFileChooser.CANCEL_OPTION) {
+      // Make sure the file is a zip file.
+      File projectFile = mergeProjectFS.getSelectedFile();
+      projectPath = projectFile.getPath();
+      if (!projectPath.toLowerCase().endsWith(".zip")) {
+        projectPath = projectPath.concat(".zip");
+        projectFile = new File(projectPath);
       }
 
-      // Confirm the user wants to overwrite an existing project, but can not
-      // overwrite one of the two projects being merged.
-      if (mergeProjectFile.exists()) {
-        if (mergeProjectFile.getPath().equalsIgnoreCase(mainProject.getProjectPath())
-            || mergeProjectFile.getPath().equalsIgnoreCase(secondProject.getProjectPath())) {
+      // Confirm that the user wants to overwrite an existing project, but do not allow
+      // overwriting one of the two projects being merged.
+      if (projectFile.exists()) {
+        if (projectFile.getPath().equalsIgnoreCase(mainProject.getProjectPath())
+            || projectFile.getPath().equalsIgnoreCase(secondProject.getProjectPath())) {
           JOptionPane.showMessageDialog(myCP, "You can not overwrite one of the two "
               + "projects being merged. Select anther file name.");
-          getFileToSaveTo();
-          return;
+          return getFileToSaveTo();
         }
         validPath = JOptionPane.showOptionDialog(myCP, "The file name you selected already "
             + "exists. Would you like to replace it?", "Replace", JOptionPane.YES_NO_OPTION,
             JOptionPane.WARNING_MESSAGE, null, null, JOptionPane.NO_OPTION);
         if (validPath == JOptionPane.CLOSED_OPTION || validPath == JOptionPane.NO_OPTION) {
-          getFileToSaveTo();
-          return;
+          return getFileToSaveTo();
         }
       }
       // The projects name is the name of the zip file.
-      String projectName = mergeProjectPath.substring(mergeProjectPath.lastIndexOf("/") + 1,
-          mergeProjectPath.lastIndexOf(".zip"));
-      // The projects name must start with a letter and can only contain
-      // letters,
+      String projectName = projectPath.substring(projectPath.lastIndexOf("/") + 1,
+          projectPath.lastIndexOf(".zip"));
+      // The projects name must start with a letter and can only contain letters,
       // numbers and underscores.
-      if (!(Character.isLetter(projectName.charAt(0))) || !(projectName.matches("^[a-zA-Z0-9_]*$"))) {
+      if (!Character.isLetter(projectName.charAt(0)) || !projectName.matches("^[a-zA-Z0-9_]*$")) {
         JOptionPane.showMessageDialog(myCP, "Project neames must start with a letter and "
-            + "can contain only letters, numbers, and underscores", "Inane error",
+            + "can contain only letters, numbers, and underscores", "File name error",
             JOptionPane.ERROR_MESSAGE);
-        getFileToSaveTo();
+        return getFileToSaveTo();
       }
     }
+    return projectPath;
   }
 
-  private boolean checkDuplicates() {
+  /*
+   * Returns true is all screens and assets to be merged have unique names, else returns false.
+   */
+  private boolean alertToDuplicates() {
     for (String screen : mainProjectScreensCBL.getChecked()) {
       if (secondProjectScreensCBL.getChecked().contains(screen)) {
-        JOptionPane.showMessageDialog(myCP, "You can not select two screens with the "
-            + "same name. Please uncheck a one of the screens and remerge.", "Inage error",
+        JOptionPane.showMessageDialog(myCP, "You cannot select two screens with the "
+            + "same name. Please uncheck one of the screens and remerge.", "Duplicate error",
             JOptionPane.ERROR_MESSAGE);
         return false;
       }
     }
     for (String asset : mainProjectAssetsCBL.getChecked()) {
       if (secondProjectAssetsCBL.getChecked().contains(asset)) {
-        JOptionPane.showMessageDialog(myCP, "You can not select two assets with the "
-            + "same name. Please uncheck a one of the assets and remerge.", "Inage error",
+        JOptionPane.showMessageDialog(myCP, "You cannot select two assets with the "
+            + "same name. Please uncheck one of the assets and remerge.", "Duplicate error",
             JOptionPane.ERROR_MESSAGE);
         return false;
       }
@@ -386,7 +424,8 @@ public class AIMerger extends JFrame {
   }
 
   /*
-   * Launches a file chooser and returns the file chosen.
+   * Launches a file chooser and returns the file chosen. The file returned will be the new merged
+   * project.
    */
   private String getFileToOpen() {
     JFileChooser projectFC = new JFileChooser();
@@ -411,7 +450,7 @@ public class AIMerger extends JFrame {
     mainProjectAssetsCBL.setListData(getAssetCheckBoxes(mainProject));
     mainProjectAssetsP.setViewportView(mainProjectAssetsCBL);
 
-    lowerLeftP.repaint();
+    mainProjectDisplayP.repaint();
   }
 
   /*
@@ -426,15 +465,14 @@ public class AIMerger extends JFrame {
     secondProjectAssetsCBL.setListData(getAssetCheckBoxes(secondProject));
     secondProjectAssetsP.setViewportView(secondProjectAssetsCBL);
 
-    lowerRightP.repaint();
+    secondProjectDisplayP.repaint();
   }
 
   /*
    * Creates an array of JCheckBoxes, a JCheckBox for each asset in the project.
    */
   private static JCheckBox[] getAssetCheckBoxes(AIProject project) {
-    List<AIAsset> tempAssetsList = new LinkedList<AIAsset>();
-    tempAssetsList = project.getAssetsList();
+    List<AIAsset> tempAssetsList = project.getAssetsList();
     JCheckBox[] assetCheckBoxLabels = new JCheckBox[tempAssetsList.size()];
     for (int i = 0; i < tempAssetsList.size(); i++) {
       assetCheckBoxLabels[i] = new JCheckBox(tempAssetsList.get(i).getName());
@@ -443,13 +481,12 @@ public class AIMerger extends JFrame {
   }
 
   /*
-   * Creates and array of JCheckBoxes, a JCheckBox for each screen in the
+   * Creates an array of JCheckBoxes, a JCheckBox for each screen in the
    * project. If the project is the main project then "Screen1" is a checked
    * JCheckBox.
    */
   private static JCheckBox[] getScreenCheckBoxes(AIProject project, boolean isMainProject) {
-    List<AIScreen> tempScreensList = new LinkedList<AIScreen>();
-    tempScreensList = project.getScreensList();
+    List<AIScreen>  tempScreensList = project.getScreensList();
     JCheckBox[] screenCheckBoxLabels = new JCheckBox[tempScreensList.size()];
     for (int i = 0; i < tempScreensList.size(); i++) {
       String tempScreenName = tempScreensList.get(i).getName();
@@ -462,74 +499,29 @@ public class AIMerger extends JFrame {
     return screenCheckBoxLabels;
   }
 
-  // to hold a reference to the content pane of the JFrame
-  public static Container myCP;
-  private static JPanel lowerLeftP;
-  private static JPanel lowerCenterP;
-  private static JPanel lowerRightP;
-
-  private static JLabel instructMainProjectL;
-  private static JLabel instructMainProjectNotesL;
-  private static JLabel instructSecondProjectL;
-  private static JLabel mainProjectTitleL;
-  private static JLabel secondProjectTitleL;
-  private static JLabel mainProjectAssetsL;
-  private static JLabel mainProjectScreensInstrucL;
-  private static JLabel mainProjectScreensL;
-  private static JLabel mainProjectAssetsInstrucL;
-  private static JLabel secondProjectAssetsL;
-  private static JLabel secondProjectScreensInstrucL;
-  private static JLabel secondProjectScreensL;
-  private static JLabel secondProjectAssetsInstrucL;
-  private static JButton mainProjectBrowseB;
-  private static JButton mainProjectLoadB;
-  private static JButton secondProjectBrowseB;
-  private static JButton secondProjectLoadB;
-  private static JButton mergeB;
-  private static JTextField mainProjectTF;
-  private static JTextField secondProjectTF;
-  private static Font HEADER_TWO_FONT = new Font("Dialog", Font.PLAIN, 18);
-  private static Font HEADER_THREE_FONT = new Font("Dialog", Font.ITALIC, 12);
-  private static Double HEIGHT_PERCENT_OF_SCREEN = 0.8;
-  private static Double WIDTH_PERCENT_OF_SCREEN = 0.8;
-  private static Dimension lowerPanelSize;
-  private static Point lowerPanelLocation;
-  private static JScrollPane mainProjectScreensP;
-  private static JScrollPane mainProjectAssetsP;
-  private static JScrollPane secondProjectScreensP;
-  private static JScrollPane secondProjectAssetsP;
-  private static CheckBoxList mainProjectScreensCBL;
-  private static CheckBoxList mainProjectAssetsCBL;
-  private static AIProject mainProject;
-  private static CheckBoxList secondProjectScreensCBL;
-  private static CheckBoxList secondProjectAssetsCBL;
-  private static AIProject secondProject;
-  private static String mergeProjectPath;
-  private final Color AndroidGreen;
-
   public AIMerger() {
     super("App Inventor Merger");
 
-    AndroidGreen = new Color(166, 199, 58);
-
+    // Set the size and location of the application's window based on the screen size.
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
     setSize((int) (screenSize.width * WIDTH_PERCENT_OF_SCREEN),
         (int) (screenSize.height * HEIGHT_PERCENT_OF_SCREEN));
     setLocation((int) ((screenSize.width - screenSize.width * WIDTH_PERCENT_OF_SCREEN) / 2),
         (int) ((screenSize.height - screenSize.height * HEIGHT_PERCENT_OF_SCREEN) / 2));
 
+    // Create a reference to the content pane of the JFrame.
     myCP = this.getContentPane();
     myCP.setLayout(null);
-    myCP.setBackground(AndroidGreen);
+    myCP.setBackground(ANDROID_GREEN);
 
-    // Main Project Layout
+    // Main project title and instructions.
     instructMainProjectL = new JLabel("Browse for and load your Main Project.");
     instructMainProjectL.setFont(HEADER_TWO_FONT);
     instructMainProjectL.setSize(1000, 24);
     instructMainProjectL.setLocation(20, 20);
     myCP.add(instructMainProjectL);
 
+    // Main project note.
     instructMainProjectNotesL = new JLabel("The main project's Screen1 will be the "
         + "merged project's Screen1");
     instructMainProjectNotesL.setFont(HEADER_THREE_FONT);
@@ -537,6 +529,7 @@ public class AIMerger extends JFrame {
     instructMainProjectNotesL.setLocation(20, instructMainProjectL.getLocation().y + 20);
     myCP.add(instructMainProjectNotesL);
 
+    // Text field to enter path to main project.
     mainProjectTF = new JTextField(300);
     mainProjectTF.setBackground(Color.WHITE);
     mainProjectTF.setEditable(true);
@@ -544,6 +537,7 @@ public class AIMerger extends JFrame {
     mainProjectTF.setLocation(20, instructMainProjectNotesL.getLocation().y + 20);
     myCP.add(mainProjectTF);
 
+    // Browse button for main project.
     mainProjectBrowseB = new JButton("Browse");
     mainProjectBrowseB.setSize(100, 30);
     mainProjectBrowseB.setLocation(mainProjectTF.getLocation().x + mainProjectTF.getSize().width
@@ -551,6 +545,7 @@ public class AIMerger extends JFrame {
     mainProjectBrowseB.addActionListener(new MainProjectBrowseBActionListener());
     myCP.add(mainProjectBrowseB);
 
+    // Load button for main project
     mainProjectLoadB = new JButton("Load");
     mainProjectLoadB.setSize(100, 30);
     mainProjectLoadB.setLocation(mainProjectBrowseB.getLocation().x
@@ -558,7 +553,7 @@ public class AIMerger extends JFrame {
     mainProjectLoadB.addActionListener(new MainProjectLoadBActionListener());
     myCP.add(mainProjectLoadB);
 
-    // Second Project Layout
+    // Second project title.
     instructSecondProjectL = new JLabel("Browse for and load your Second Project.");
     instructSecondProjectL.setFont(HEADER_TWO_FONT);
     instructSecondProjectL.setSize(1000, 24);
@@ -566,6 +561,7 @@ public class AIMerger extends JFrame {
         + mainProjectTF.getSize().height + 20);
     myCP.add(instructSecondProjectL);
 
+    // Text field to enter the second project's path.
     secondProjectTF = new JTextField(300);
     secondProjectTF.setBackground(Color.WHITE);
     secondProjectTF.setEditable(true);
@@ -573,6 +569,7 @@ public class AIMerger extends JFrame {
     secondProjectTF.setLocation(20, instructSecondProjectL.getLocation().y + 25);
     myCP.add(secondProjectTF);
 
+    // Browse button for the second project
     secondProjectBrowseB = new JButton("Browse");
     secondProjectBrowseB.setSize(100, 30);
     secondProjectBrowseB.setLocation(secondProjectTF.getLocation().x
@@ -580,6 +577,7 @@ public class AIMerger extends JFrame {
     secondProjectBrowseB.addActionListener(new SecondProjectBrowseBActionListener());
     myCP.add(secondProjectBrowseB);
 
+    // Load button for the second project.
     secondProjectLoadB = new JButton("Load");
     secondProjectLoadB.setSize(100, 30);
     secondProjectLoadB.setLocation(
@@ -588,142 +586,157 @@ public class AIMerger extends JFrame {
     secondProjectLoadB.addActionListener(new SecondProjectLoadBActionListener());
     myCP.add(secondProjectLoadB);
 
-    // Layout for Icon
+    // AI Merger icon 
     BufferedImage myPicture = null;
     try {
       myPicture = ImageIO.read(new File("logoclear.png"));
+      JLabel picLabel = new JLabel(new ImageIcon(myPicture));
+      picLabel.setSize(400, 145);
+      picLabel.setLocation(575, 20);
+      myCP.add(picLabel);
     } catch (IOException e) {
-      e.printStackTrace();
+      // If unable to load logo, continue without displaying it. 
     }
-    JLabel picLabel = new JLabel(new ImageIcon(myPicture));
-    picLabel.setSize(400, 145);
-    picLabel.setLocation(575, 20);
-    myCP.add(picLabel);
 
-    // Lower Panel
-    lowerPanelLocation = new Point(20, secondProjectTF.getLocation().y + 50);
-    lowerPanelSize = new Dimension((int) (screenSize.width * .8) - 40,
-        (int) (screenSize.height * .8) - lowerPanelLocation.y - 40);
+    // Location and size of the panel that displays the projects.
+    projectDisplayPanelLocation = new Point(20, secondProjectTF.getLocation().y + OFFSET);
+    projectDisplayPanelSize = new Dimension((int) (screenSize.width * WIDTH_PERCENT_OF_SCREEN) - 
+        OFFSET, (int) (screenSize.height * HEIGHT_PERCENT_OF_SCREEN) - 
+        projectDisplayPanelLocation.y - OFFSET);
 
-    // Lower left Panel
-    lowerLeftP = new JPanel();
-    lowerLeftP.setVisible(false);
-    lowerLeftP.setSize(lowerPanelSize.width / 3, lowerPanelSize.height);
-    lowerLeftP.setLocation(20, lowerPanelLocation.y);
-    lowerLeftP.setLayout(new BoxLayout(lowerLeftP, BoxLayout.Y_AXIS));
-    lowerLeftP.setBorder(new EmptyBorder(5, 20, 20, 20));
+    // Panel that holds the components of the main project.
+    mainProjectDisplayP = new JPanel();
+    mainProjectDisplayP.setVisible(false);
+    mainProjectDisplayP.setSize(projectDisplayPanelSize.width / 3, projectDisplayPanelSize.height);
+    mainProjectDisplayP.setLocation(20, projectDisplayPanelLocation.y);
+    mainProjectDisplayP.setLayout(new BoxLayout(mainProjectDisplayP, BoxLayout.Y_AXIS));
+    mainProjectDisplayP.setBorder(new EmptyBorder(5, 20, 20, 20));
+    myCP.add(mainProjectDisplayP);
 
-    myCP.add(lowerLeftP);
-
+    // Main project's name.
     mainProjectTitleL = new JLabel();
     mainProjectTitleL.setFont(HEADER_TWO_FONT);
-    lowerLeftP.add(mainProjectTitleL);
+    mainProjectDisplayP.add(mainProjectTitleL);
 
-    lowerLeftP.add(Box.createRigidArea(new Dimension(0, 10)));
+    mainProjectDisplayP.add(Box.createRigidArea(new Dimension(0, 10)));
 
+    // Label for the list of screens for the main project
     mainProjectScreensL = new JLabel("Screens");
     mainProjectScreensL.setFont(HEADER_TWO_FONT);
-    lowerLeftP.add(mainProjectScreensL);
+    mainProjectDisplayP.add(mainProjectScreensL);
 
+    // Instructions for the list of screens for the main project.
     mainProjectScreensInstrucL = new JLabel("Check screens to merge into new project");
     mainProjectScreensInstrucL.setFont(HEADER_THREE_FONT);
-    lowerLeftP.add(mainProjectScreensInstrucL);
+    mainProjectDisplayP.add(mainProjectScreensInstrucL);
 
+    // List of checkboxes for the screens from the main project
     mainProjectScreensCBL = new CheckBoxList();
     mainProjectScreensP = new JScrollPane();
+    mainProjectDisplayP.add(mainProjectScreensP);
 
-    lowerLeftP.add(mainProjectScreensP);
+    mainProjectDisplayP.add(Box.createRigidArea(new Dimension(0, 10)));
 
-    lowerLeftP.add(Box.createRigidArea(new Dimension(0, 10)));
-
+    // Label for the list of assets for the main project
     mainProjectAssetsL = new JLabel("Assets");
     mainProjectAssetsL.setFont(HEADER_TWO_FONT);
-    lowerLeftP.add(mainProjectAssetsL);
+    mainProjectDisplayP.add(mainProjectAssetsL);
 
+    // Instructions for the list of assets for the main project.
     mainProjectAssetsInstrucL = new JLabel("Check assets to merge into new project");
     mainProjectAssetsInstrucL.setFont(HEADER_THREE_FONT);
-    lowerLeftP.add(mainProjectAssetsInstrucL);
+    mainProjectDisplayP.add(mainProjectAssetsInstrucL);
 
+    // List of checkboxes for the assets from the main project.
     mainProjectAssetsCBL = new CheckBoxList();
     mainProjectAssetsP = new JScrollPane();
-    lowerLeftP.add(mainProjectAssetsP);
+    mainProjectDisplayP.add(mainProjectAssetsP);
 
-    // Lower Center Panel
-    lowerCenterP = new JPanel();
-    lowerCenterP.setVisible(false);
-    lowerCenterP.setSize(lowerPanelSize.width / 3, lowerPanelSize.height);
-    lowerCenterP.setLocation(lowerPanelSize.width / 3 + 20, lowerPanelLocation.y);
-    lowerCenterP.setBackground(AndroidGreen);
-    lowerCenterP.setLayout(null);
-    myCP.add(lowerCenterP);
+    // Panel that holds the merge button and arrows.
+    mergeButtonP = new JPanel();
+    mergeButtonP.setVisible(false);
+    mergeButtonP.setSize(projectDisplayPanelSize.width / 3, projectDisplayPanelSize.height);
+    mergeButtonP.setLocation(projectDisplayPanelSize.width / 3 + 20, projectDisplayPanelLocation.y);
+    mergeButtonP.setBackground(ANDROID_GREEN);
+    mergeButtonP.setLayout(null);
+    myCP.add(mergeButtonP);
 
+    // Merge button.
     mergeB = new JButton("Merge");
     mergeB.setSize(150, 100);
-    mergeB.setLocation(lowerCenterP.getWidth() / 2 - mergeB.getWidth() / 2,
-        lowerCenterP.getHeight() / 2 - mergeB.getHeight() / 2);
+    mergeB.setLocation(mergeButtonP.getWidth() / 2 - mergeB.getWidth() / 2,
+        mergeButtonP.getHeight() / 2 - mergeB.getHeight() / 2);
     mergeB.addActionListener(new MergeBActionListener());
-    lowerCenterP.add(mergeB);
+    mergeButtonP.add(mergeB);
 
-    // BufferedImage myPicture = null;
+    // Merging arrows image.
     try {
       myPicture = ImageIO.read(new File("arrows3.png"));
+      picLabel = new JLabel(new ImageIcon(myPicture));
+      picLabel.setSize(332, 250);
+      picLabel.setLocation((mergeButtonP.getWidth() - picLabel.getWidth()) / 2,
+          (mergeButtonP.getHeight() - picLabel.getHeight()) / 2);
+      mergeButtonP.add(picLabel);
     } catch (IOException e) {
-      e.printStackTrace();
+      // If unable to load arrows, continue without displaying it. 
     }
-    picLabel = new JLabel(new ImageIcon(myPicture));
-    picLabel.setSize(332, 250);
-    picLabel.setLocation(lowerCenterP.getWidth() / 2 - picLabel.getWidth() / 2,
-        lowerCenterP.getHeight() / 2 - picLabel.getHeight() / 2);
-    lowerCenterP.add(picLabel);
 
-    // Lower right Panel
-    lowerRightP = new JPanel();
-    lowerRightP.setVisible(false);
-    lowerRightP.setSize(lowerPanelSize.width / 3, lowerPanelSize.height);
-    lowerRightP.setLocation(2 * lowerPanelSize.width / 3 + 20, lowerPanelLocation.y);
-    lowerRightP.setLayout(new BoxLayout(lowerRightP, BoxLayout.Y_AXIS));
-    lowerRightP.setBorder(new EmptyBorder(5, 20, 20, 20));
-    myCP.add(lowerRightP);
+    // Panel that holds the components of the second project.
+    secondProjectDisplayP = new JPanel();
+    secondProjectDisplayP.setVisible(false);
+    secondProjectDisplayP.setSize(projectDisplayPanelSize.width / 3, 
+        projectDisplayPanelSize.height);
+    secondProjectDisplayP.setLocation(2 * projectDisplayPanelSize.width / 3 + 20, 
+        projectDisplayPanelLocation.y);
+    secondProjectDisplayP.setLayout(new BoxLayout(secondProjectDisplayP, BoxLayout.Y_AXIS));
+    secondProjectDisplayP.setBorder(new EmptyBorder(5, 20, 20, 20));
+    myCP.add(secondProjectDisplayP);
 
+    // Second project's name.
     secondProjectTitleL = new JLabel();
     secondProjectTitleL.setFont(HEADER_TWO_FONT);
-    lowerRightP.add(secondProjectTitleL);
+    secondProjectDisplayP.add(secondProjectTitleL);
 
-    lowerRightP.add(Box.createRigidArea(new Dimension(0, 10)));
+    secondProjectDisplayP.add(Box.createRigidArea(new Dimension(0, 10)));
 
+    // Label for the list of screens for the second project
     secondProjectScreensL = new JLabel("Screens");
     secondProjectScreensL.setFont(HEADER_TWO_FONT);
-    lowerRightP.add(secondProjectScreensL);
+    secondProjectDisplayP.add(secondProjectScreensL);
 
+    // Instructions for the list of screens for the second project.
     secondProjectScreensInstrucL = new JLabel("Check Screens to Merge into New Project");
     secondProjectScreensInstrucL.setFont(HEADER_THREE_FONT);
-    lowerRightP.add(secondProjectScreensInstrucL);
+    secondProjectDisplayP.add(secondProjectScreensInstrucL);
 
+    // List of checkboxes for the screens from the second project.
     secondProjectScreensCBL = new CheckBoxList();
     secondProjectScreensP = new JScrollPane();
+    secondProjectDisplayP.add(secondProjectScreensP);
 
-    lowerRightP.add(secondProjectScreensP);
+    secondProjectDisplayP.add(Box.createRigidArea(new Dimension(0, 10)));
 
-    lowerRightP.add(Box.createRigidArea(new Dimension(0, 10)));
-
+    // Label for the list of assets for the second project
     secondProjectAssetsL = new JLabel("Assets");
     secondProjectAssetsL.setFont(HEADER_TWO_FONT);
-    lowerRightP.add(secondProjectAssetsL);
-
+    secondProjectDisplayP.add(secondProjectAssetsL);
+ 
+    // Instructions for the list of assets for the second project.
     secondProjectAssetsInstrucL = new JLabel("Check Assets to Merge into New Project");
     secondProjectAssetsInstrucL.setFont(HEADER_THREE_FONT);
-    lowerRightP.add(secondProjectAssetsInstrucL);
+    secondProjectDisplayP.add(secondProjectAssetsInstrucL);
 
+    // List of checkboxes for the assets from the second project.
     secondProjectAssetsCBL = new CheckBoxList();
     secondProjectAssetsP = new JScrollPane();
-    lowerRightP.add(secondProjectAssetsP);
+    secondProjectDisplayP.add(secondProjectAssetsP);
 
     setVisible(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
   }
 
   public static void main(String[] args) {
-    AIMerger myApp = new AIMerger();
+    instance = new AIMerger();
   }
 
 }

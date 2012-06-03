@@ -64,18 +64,19 @@ public class AIProject {
         }
       }
       // Check if valid project, if not show error.
-      if (!(valid = (screensList != null && propertiesFilePath != null))) {
+      valid = (screensList != null && propertiesFilePath != null);
+      if (!valid) {
         JOptionPane.showMessageDialog(AIMerger.myCP, "The selected project is not a project "
-            + "source file! Project source files are zip files.", "Inane error",
+            + "source file! Project source files are zip files.", "File error",
             JOptionPane.ERROR_MESSAGE);
       }
     } catch (ZipException e) {
       JOptionPane.showMessageDialog(AIMerger.myCP, "The selected project is not a project source "
-          + "file! Project source files are zip files.", "Inane error", JOptionPane.ERROR_MESSAGE);
+          + "file! Project source files are zip files.", "File error", JOptionPane.ERROR_MESSAGE);
       valid = false;
     } catch (IOException e) {
-      JOptionPane.showMessageDialog(AIMerger.myCP, "The selected project is nota a project source"
-          + " file! Project source files are zip files.", "Inane error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(AIMerger.myCP, "The selected project is not a project source"
+          + " file! Project source files are zip files.", "File error", JOptionPane.ERROR_MESSAGE);
       valid = false;
     }
   }
