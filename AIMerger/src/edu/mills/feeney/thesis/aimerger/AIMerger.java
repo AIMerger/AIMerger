@@ -44,16 +44,16 @@ import javax.swing.border.EmptyBorder;
 public class AIMerger extends JFrame {
 
   private static AIMerger instance;
-  public static Container myCP;
-  private static JPanel mainProjectDisplayP;
-  private static JPanel mergeButtonP;
-  private static JPanel secondProjectDisplayP;
+  public Container myCP;
+  private JPanel mainProjectDisplayP;
+  private JPanel mergeButtonP;
+  private JPanel secondProjectDisplayP;
 
   private JLabel instructMainProjectL;
   private JLabel instructMainProjectNotesL;
   private JLabel instructSecondProjectL;
-  private static JLabel mainProjectTitleL;
-  private static JLabel secondProjectTitleL;
+  private JLabel mainProjectTitleL;
+  private JLabel secondProjectTitleL;
   private JLabel mainProjectAssetsL;
   private JLabel mainProjectScreensInstrucL;
   private JLabel mainProjectScreensL;
@@ -77,17 +77,17 @@ public class AIMerger extends JFrame {
   private int OFFSET = 50;
   private Dimension projectDisplayPanelSize;
   private Point projectDisplayPanelLocation;
-  private static JScrollPane mainProjectScreensP;
-  private static JScrollPane mainProjectAssetsP;
-  private static JScrollPane secondProjectScreensP;
-  private static JScrollPane secondProjectAssetsP;
-  private static CheckBoxList mainProjectScreensCBL;
-  private static CheckBoxList mainProjectAssetsCBL;
-  private static AIProject mainProject;
-  private static CheckBoxList secondProjectScreensCBL;
-  private static CheckBoxList secondProjectAssetsCBL;
-  private static AIProject secondProject;
-  private static String mergeProjectPath;
+  private JScrollPane mainProjectScreensP;
+  private JScrollPane mainProjectAssetsP;
+  private JScrollPane secondProjectScreensP;
+  private JScrollPane secondProjectAssetsP;
+  private CheckBoxList mainProjectScreensCBL;
+  private CheckBoxList mainProjectAssetsCBL;
+  private AIProject mainProject;
+  private CheckBoxList secondProjectScreensCBL;
+  private CheckBoxList secondProjectAssetsCBL;
+  private AIProject secondProject;
+  private String mergeProjectPath;
   private final Color ANDROID_GREEN = new Color(166, 199, 58);
 
   // Action listener for the main project's browse button.
@@ -441,31 +441,36 @@ public class AIMerger extends JFrame {
    * Updates the lower left part of the screen to display the main project.
    */
   private static void updateMainProjectView() {
-    mainProjectTitleL.setText("Main Project: " + mainProject.getProjectName());
+    getInstance().mainProjectTitleL.setText("Main Project: "
+        + getInstance().mainProject.getProjectName());
 
-    mainProjectScreensCBL.setListData(getScreenCheckBoxes(mainProject, true));
-    mainProjectScreensCBL.checked.add("Screen1");
-    mainProjectScreensP.setViewportView(mainProjectScreensCBL);
+    getInstance().mainProjectScreensCBL.setListData(getScreenCheckBoxes(getInstance().mainProject,
+        true));
+    getInstance().mainProjectScreensCBL.checked.add("Screen1");
+    getInstance().mainProjectScreensP.setViewportView(getInstance().mainProjectScreensCBL);
 
-    mainProjectAssetsCBL.setListData(getAssetCheckBoxes(mainProject));
-    mainProjectAssetsP.setViewportView(mainProjectAssetsCBL);
+    getInstance().mainProjectAssetsCBL.setListData(getAssetCheckBoxes(getInstance().mainProject));
+    getInstance().mainProjectAssetsP.setViewportView(getInstance().mainProjectAssetsCBL);
 
-    mainProjectDisplayP.repaint();
+    getInstance().mainProjectDisplayP.repaint();
   }
 
   /*
    * Updates the lower right part of the screen to display the second project.
    */
   private static void updateSecondProjectView() {
-    secondProjectTitleL.setText("Second Project: " + secondProject.getProjectName());
+    getInstance().secondProjectTitleL.setText("Second Project: "
+        + getInstance().secondProject.getProjectName());
 
-    secondProjectScreensCBL.setListData(getScreenCheckBoxes(secondProject, false));
-    secondProjectScreensP.setViewportView(secondProjectScreensCBL);
+    getInstance().secondProjectScreensCBL.setListData(getScreenCheckBoxes(
+        getInstance().secondProject, false));
+    getInstance().secondProjectScreensP.setViewportView(getInstance().secondProjectScreensCBL);
 
-    secondProjectAssetsCBL.setListData(getAssetCheckBoxes(secondProject));
-    secondProjectAssetsP.setViewportView(secondProjectAssetsCBL);
+    getInstance().secondProjectAssetsCBL
+        .setListData(getAssetCheckBoxes(getInstance().secondProject));
+    getInstance().secondProjectAssetsP.setViewportView(getInstance().secondProjectAssetsCBL);
 
-    secondProjectDisplayP.repaint();
+    getInstance().secondProjectDisplayP.repaint();
   }
 
   /*
@@ -720,7 +725,7 @@ public class AIMerger extends JFrame {
     secondProjectAssetsL = new JLabel("Assets");
     secondProjectAssetsL.setFont(HEADER_TWO_FONT);
     secondProjectDisplayP.add(secondProjectAssetsL);
- 
+
     // Instructions for the list of assets for the second project.
     secondProjectAssetsInstrucL = new JLabel("Check Assets to Merge into New Project");
     secondProjectAssetsInstrucL.setFont(HEADER_THREE_FONT);
@@ -733,8 +738,11 @@ public class AIMerger extends JFrame {
 
     setVisible(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-  }
 
+  }
+  public static AIMerger getInstance() {
+    return instance;
+  }
   public static void main(String[] args) {
     instance = new AIMerger();
   }

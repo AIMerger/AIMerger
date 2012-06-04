@@ -66,16 +66,16 @@ public class AIProject {
       // Check if valid project, if not show error.
       valid = (screensList != null && propertiesFilePath != null);
       if (!valid) {
-        JOptionPane.showMessageDialog(AIMerger.myCP, "The selected project is not a project "
+        JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, "The selected project is not a project "
             + "source file! Project source files are zip files.", "File error",
             JOptionPane.ERROR_MESSAGE);
       }
     } catch (ZipException e) {
-      JOptionPane.showMessageDialog(AIMerger.myCP, "The selected project is not a project source "
+      JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, "The selected project is not a project source "
           + "file! Project source files are zip files.", "File error", JOptionPane.ERROR_MESSAGE);
       valid = false;
     } catch (IOException e) {
-      JOptionPane.showMessageDialog(AIMerger.myCP, "The selected project is not a project source"
+      JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, "The selected project is not a project source"
           + " file! Project source files are zip files.", "File error", JOptionPane.ERROR_MESSAGE);
       valid = false;
     }
