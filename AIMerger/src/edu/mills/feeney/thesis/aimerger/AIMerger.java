@@ -70,11 +70,11 @@ public class AIMerger extends JFrame {
   private JButton mergeB;
   private JTextField mainProjectTF;
   private JTextField secondProjectTF;
-  private Font HEADER_TWO_FONT = new Font("Dialog", Font.PLAIN, 18);
-  private Font HEADER_THREE_FONT = new Font("Dialog", Font.ITALIC, 12);
-  private Double HEIGHT_PERCENT_OF_SCREEN = 0.8;
-  private Double WIDTH_PERCENT_OF_SCREEN = 0.8;
-  private int OFFSET = 50;
+  private static final Font HEADER_TWO_FONT = new Font("Dialog", Font.PLAIN, 18);
+  private static final Font HEADER_THREE_FONT = new Font("Dialog", Font.ITALIC, 12);
+  private static final double HEIGHT_PERCENT_OF_SCREEN = 0.8;
+  private static final double WIDTH_PERCENT_OF_SCREEN = 0.8;
+  private static final int BORDER_THICKNESS = 50;
   private Dimension projectDisplayPanelSize;
   private Point projectDisplayPanelLocation;
   private JScrollPane mainProjectScreensP;
@@ -88,11 +88,11 @@ public class AIMerger extends JFrame {
   private CheckBoxList secondProjectAssetsCBL;
   private AIProject secondProject;
   private String mergeProjectPath;
-  private final Color ANDROID_GREEN = new Color(166, 199, 58);
+  private static final Color ANDROID_GREEN = new Color(166, 199, 58);
 
   // Action listener for the main project's browse button.
   private class MainProjectBrowseBActionListener implements ActionListener {
-    // When the main project's Browse button is pressed, a file browsing window
+    // When the main project's Browse button is pressed, a file-browsing window
     // opens and the file selected by the user appears in the main project text box.
     @Override
     public void actionPerformed(ActionEvent event) {
@@ -105,7 +105,7 @@ public class AIMerger extends JFrame {
 
   // Action listener for the second project's browse button.
   private class SecondProjectBrowseBActionListener implements ActionListener {
-    // When the second project's Browse button is pressed, a file browsing window
+    // When the second project's Browse button is pressed, a file-browsing window
     // opens and the file selected by the user appears in the second project text box.
     @Override
     public void actionPerformed(ActionEvent event) {
@@ -594,7 +594,7 @@ public class AIMerger extends JFrame {
     // AI Merger icon 
     BufferedImage myPicture = null;
     try {
-      myPicture = ImageIO.read(new File("logoclear.png"));
+      myPicture = ImageIO.read(new File("img/logoclear.png"));
       JLabel picLabel = new JLabel(new ImageIcon(myPicture));
       picLabel.setSize(400, 145);
       picLabel.setLocation(575, 20);
@@ -604,10 +604,10 @@ public class AIMerger extends JFrame {
     }
 
     // Location and size of the panel that displays the projects.
-    projectDisplayPanelLocation = new Point(20, secondProjectTF.getLocation().y + OFFSET);
+    projectDisplayPanelLocation = new Point(20, secondProjectTF.getLocation().y + BORDER_THICKNESS);
     projectDisplayPanelSize = new Dimension((int) (screenSize.width * WIDTH_PERCENT_OF_SCREEN) - 
-        OFFSET, (int) (screenSize.height * HEIGHT_PERCENT_OF_SCREEN) - 
-        projectDisplayPanelLocation.y - OFFSET);
+        BORDER_THICKNESS, (int) (screenSize.height * HEIGHT_PERCENT_OF_SCREEN) - 
+        projectDisplayPanelLocation.y - BORDER_THICKNESS);
 
     // Panel that holds the components of the main project.
     mainProjectDisplayP = new JPanel();
@@ -676,7 +676,7 @@ public class AIMerger extends JFrame {
 
     // Merging arrows image.
     try {
-      myPicture = ImageIO.read(new File("arrows3.png"));
+      myPicture = ImageIO.read(new File("img/arrows3.png"));
       picLabel = new JLabel(new ImageIcon(myPicture));
       picLabel.setSize(332, 250);
       picLabel.setLocation((mergeButtonP.getWidth() - picLabel.getWidth()) / 2,
