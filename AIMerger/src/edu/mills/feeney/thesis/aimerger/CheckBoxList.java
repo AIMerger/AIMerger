@@ -9,7 +9,7 @@ import java.util.LinkedList;
 /**
  * Displays the list of checkboxes. 
  * 
- * Based on code at www.devx.com/tips/Tip/5342 by Trevor Harmon, Febuary 10, 1999.
+ * Informed by code at www.devx.com/tips/Tip/5342 by Trevor Harmon, Febuary 10, 1999.
  * 
  * @author feeney.kate@gmail.com (Kate Feeney)
  *
