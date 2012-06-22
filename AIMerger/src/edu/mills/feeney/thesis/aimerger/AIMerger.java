@@ -591,17 +591,11 @@ public class AIMerger extends JFrame {
     secondProjectLoadB.addActionListener(new SecondProjectLoadBActionListener());
     myCP.add(secondProjectLoadB);
 
-    // AI Merger icon 
-    BufferedImage myPicture = null;
-    try {
-      myPicture = ImageIO.read(new File("img/logoclear.png"));
-      JLabel picLabel = new JLabel(new ImageIcon(myPicture));
-      picLabel.setSize(400, 145);
-      picLabel.setLocation(575, 20);
-      myCP.add(picLabel);
-    } catch (IOException e) {
-      // If unable to load logo, continue without displaying it. 
-    }
+    // AI Merger icon
+    JLabel picLabel = new JLabel(new ImageIcon(getClass().getResource("img/logoclear.png")));
+    picLabel.setSize(400, 145);
+    picLabel.setLocation(575, 20);
+    myCP.add(picLabel);
 
     // Location and size of the panel that displays the projects.
     projectDisplayPanelLocation = new Point(20, secondProjectTF.getLocation().y + BORDER_THICKNESS);
@@ -675,16 +669,11 @@ public class AIMerger extends JFrame {
     mergeButtonP.add(mergeB);
 
     // Merging arrows image.
-    try {
-      myPicture = ImageIO.read(new File("img/arrows3.png"));
-      picLabel = new JLabel(new ImageIcon(myPicture));
-      picLabel.setSize(332, 250);
-      picLabel.setLocation((mergeButtonP.getWidth() - picLabel.getWidth()) / 2,
-          (mergeButtonP.getHeight() - picLabel.getHeight()) / 2);
-      mergeButtonP.add(picLabel);
-    } catch (IOException e) {
-      // If unable to load arrows, continue without displaying it. 
-    }
+    picLabel = new JLabel(new ImageIcon(getClass().getResource("img/arrows3.png")));
+    picLabel.setSize(332, 250);
+    picLabel.setLocation((mergeButtonP.getWidth() - picLabel.getWidth()) / 2,
+        (mergeButtonP.getHeight() - picLabel.getHeight()) / 2);
+    mergeButtonP.add(picLabel);
 
     // Panel that holds the components of the second project.
     secondProjectDisplayP = new JPanel();
