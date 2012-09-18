@@ -15,7 +15,7 @@ import java.util.LinkedList;
  *
  */
 public class CheckBoxList extends JList {
-  LinkedList<String> checked = new LinkedList<String>();
+  private LinkedList<String> checked = new LinkedList<String>();
   protected static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
   public CheckBoxList() {
@@ -46,6 +46,13 @@ public class CheckBoxList extends JList {
 
   public LinkedList<String> getChecked() {
     return checked;
+  }
+  
+  /**
+   * Clears the list of checked items.
+   */
+  public void clearChecked() {
+    checked.clear();
   }
 
   protected class CellRenderer implements ListCellRenderer {

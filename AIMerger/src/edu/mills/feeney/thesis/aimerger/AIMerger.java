@@ -275,6 +275,10 @@ public class AIMerger extends JFrame {
    * is passed then this is loaded as the main project.
    */
   private void resetAIMerger(String aiProjectPath) {
+    mainProjectScreensCBL.clearChecked();
+    mainProjectAssetsCBL.clearChecked();
+    secondProjectScreensCBL.clearChecked();
+    secondProjectAssetsCBL.clearChecked();
     mainProjectTF.setText(null);
     secondProjectTF.setText(null);
     mainProjectDisplayP.setVisible(false);
@@ -446,10 +450,12 @@ public class AIMerger extends JFrame {
 
     getInstance().mainProjectScreensCBL.setListData(getScreenCheckBoxes(getInstance().mainProject,
         true));
-    getInstance().mainProjectScreensCBL.checked.add("Screen1");
+    getInstance().mainProjectScreensCBL.clearChecked();
+    getInstance().mainProjectScreensCBL.getChecked().add("Screen1");
     getInstance().mainProjectScreensP.setViewportView(getInstance().mainProjectScreensCBL);
 
     getInstance().mainProjectAssetsCBL.setListData(getAssetCheckBoxes(getInstance().mainProject));
+    getInstance().mainProjectAssetsCBL.clearChecked();
     getInstance().mainProjectAssetsP.setViewportView(getInstance().mainProjectAssetsCBL);
 
     getInstance().mainProjectDisplayP.repaint();
@@ -464,10 +470,12 @@ public class AIMerger extends JFrame {
 
     getInstance().secondProjectScreensCBL.setListData(getScreenCheckBoxes(
         getInstance().secondProject, false));
+    getInstance().secondProjectScreensCBL.clearChecked();
     getInstance().secondProjectScreensP.setViewportView(getInstance().secondProjectScreensCBL);
 
     getInstance().secondProjectAssetsCBL
         .setListData(getAssetCheckBoxes(getInstance().secondProject));
+    getInstance().secondProjectAssetsCBL.clearChecked();
     getInstance().secondProjectAssetsP.setViewportView(getInstance().secondProjectAssetsCBL);
 
     getInstance().secondProjectDisplayP.repaint();
@@ -505,7 +513,7 @@ public class AIMerger extends JFrame {
   }
 
   public AIMerger() {
-    super("App Inventor Merger");
+    super("App Inventor Merger v1.1");
 
     // Set the size and location of the application's window based on the screen size.
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
