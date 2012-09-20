@@ -66,17 +66,19 @@ public class AIProject {
       // Check if valid project, if not show error.
       valid = screensList != null && propertiesFilePath != null;
       if (!valid) {
-        JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, "The selected project is not a project "
-            + "source file! Project source files are zip files.", "File error",
+        JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, "The selected project is not a"
+        		+ " project source file! Project source files are zip files.", "File error",
             JOptionPane.ERROR_MESSAGE);
       }
     } catch (ZipException e) {
-      JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, "The selected project is not a project source "
-          + "file! Project source files are zip files.", "File error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, 
+          "The selected project is not a project source file! Project source files are zip files.", 
+          "File error", JOptionPane.ERROR_MESSAGE);
       valid = false;
     } catch (IOException e) {
-      JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, "The selected project is not a project source"
-          + " file! Project source files are zip files.", "File error", JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(AIMerger.getInstance().myCP, 
+          "The selected project is not a project source file! Project source files are zip files.", 
+          "File error", JOptionPane.ERROR_MESSAGE);
       valid = false;
     }
   }
@@ -88,8 +90,10 @@ public class AIProject {
    */
   public String getProjectName() {
     // The projectName is the name of the zip file.
-    if (projectPath.contains("/")) {
-      return projectPath.substring(projectPath.lastIndexOf("/") + 1, projectPath.lastIndexOf("."));
+    String fileSeparator = File.separator;
+    if (projectPath.contains(fileSeparator)) {
+      return projectPath.substring(projectPath.lastIndexOf(fileSeparator) + 1, 
+          projectPath.lastIndexOf("."));
     } else {
       return projectPath;
     }

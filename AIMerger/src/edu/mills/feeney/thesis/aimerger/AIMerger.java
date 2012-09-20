@@ -390,7 +390,7 @@ public class AIMerger extends JFrame {
         }
       }
       // The projects name is the name of the zip file.
-      String projectName = projectPath.substring(projectPath.lastIndexOf("/") + 1,
+      String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1,
           projectPath.lastIndexOf(".zip"));
       // The projects name must start with a letter and can only contain letters,
       // numbers and underscores.
