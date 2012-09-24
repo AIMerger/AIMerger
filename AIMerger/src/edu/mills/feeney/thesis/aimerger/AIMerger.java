@@ -395,7 +395,7 @@ public class AIMerger extends JFrame {
       // The projects name must start with a letter and can only contain letters,
       // numbers and underscores.
       if (!Character.isLetter(projectName.charAt(0)) || !projectName.matches("^[a-zA-Z0-9_]*$")) {
-        JOptionPane.showMessageDialog(myCP, "Project neames must start with a letter and "
+        JOptionPane.showMessageDialog(myCP, "Project names must start with a letter and "
             + "can contain only letters, numbers, and underscores", "File name error",
             JOptionPane.ERROR_MESSAGE);
         return getFileToSaveTo();

@@ -90,9 +90,8 @@ public class AIProject {
    */
   public String getProjectName() {
     // The projectName is the name of the zip file.
-    String fileSeparator = File.separator;
-    if (projectPath.contains(fileSeparator)) {
-      return projectPath.substring(projectPath.lastIndexOf(fileSeparator) + 1, 
+    if (projectPath.contains(File.separator)) {
+      return projectPath.substring(projectPath.lastIndexOf(File.separator) + 1, 
           projectPath.lastIndexOf("."));
     } else {
       return projectPath;
